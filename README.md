@@ -1,3 +1,11 @@
+Presented by
+====
+
+* [Romain Pelisse](https://github.com/rpelisse)
+
+Connecting to the system
+===
+
 Use the browser on your sytem to allocate one instance of this lab for you. Once this is done, you'll get a DNS hostname (or an IP) to get to the remote system provided for you. Simply use the SSH command to connect to the system with the user 'quarkus':
 
 ``` $ ssh quarkus@<DNS-name>```
@@ -7,6 +15,7 @@ The password is: re3dh4t1!
 If you are not familliar with SSH, please let me (the instructor) know!
 
 Lab 0 - Setting Up Developement Env (15')
+===
 
 First of all, double check that the system you've been allocated for this lab has all the required software available:
 
@@ -136,6 +145,7 @@ Note: Unnecessary use of -X or --request, GET is already inferred.
 Before moving to the next lab, do ask any question about this part to the instructor. Also note that from now on, you are free to do or skip any part of the lab. Focus on what you wish to explore. The following labs are, as much as much as possible, independant from each other. Also that it's unlikely you will have time to do all of them during the time allowed by this lab.
 
 Lab 1 - Quarkus Core Features (CDI, Logging,...)
+===
 
 This lab contains a series of requirements for you to implement by changing the code of the application we build during the first lab. Each requirement will allow you to explore the API and services provided by the Quarkus framework.
 
@@ -145,22 +155,26 @@ This lab contains a series of requirements for you to implement by changing the 
 * Replace your logfile using the [logging facility offered by Quarkus](https://quarkus.io/guides/logging-guide), rerun your benchmark to compare the performance of this new implementation
 * Ensure this logger is invoked during startup and shutdown using the [lifecycle events](https://quarkus.io/guides/application-lifecycle-events-guide)
 
-Lab 3 - ReST
+Lab 2 - ReST
+===
 
 * Modify the service to support [JSON](https://quarkus.io/guides/rest-json-guide)
 * Use the [Hibernate Validator](https://quarkus.io/guides/validation-guide) facility to validate input data.
 * Use the [ReST Client](https://quarkus.io/guides/rest-client-guide) to implement a proxy to TODO
 
-Lab 4 - Hibernate (with Panache) - TODO
+Lab 3 - Hibernate (with Panache) - TODO
+====
 
 * Set up Hibernate
 * Simplify using Panache: https://quarkus.io/guides/hibernate-orm-panache-guide
 
-Lab 5 - Security - TODO
+Lab 4 - Security - TODO
+===
 
 * https://quarkus.io/guides/security-guide
 
-Lab 6 - Native image with GraalVM
+Lab 5 - Native image with GraalVM
+====
 
 OK, so now we have a very lightweight ReST Service that starts in barely a few milliseonds. It's already incredibly fast compare to regular Java application server, but let's go even further, by generating a ... native image!
 
