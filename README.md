@@ -44,6 +44,8 @@ mvn io.quarkus:quarkus-maven-plugin:0.15.0:create \
     -Dpath="/quarkus"
 ```
 
+** Please do use the Quarkus version 0.15.0 and not a newer version, thanks! **
+
 Now, change your default directory to the directory created by the previous command (./quarkus-intro-lab):
 
 ```
@@ -288,8 +290,10 @@ OK, so now we have a very lightweight ReST Service that starts in barely a few m
 
 Download GraalVM:
 ```
-wget https://github.com/oracle/graal/releases/download/vm-19.0.0/graalvm-ce-linux-amd64-19.0.0.tar.gz
+wget https://github.com/oracle/graal/releases/download/vm-1.0.0-rc16/graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz
 ```
+
+**Please, download and use GraalVM v1.0.0-rc16 and not a more recent version!**
 
 Decompress the archive and set the GRAALVM_HOME to match resulting directory:
 
@@ -303,11 +307,21 @@ Build the application using the following commnad line:
 $  mvn package -Pnative
 ```
 
-TODO: Add the info on starting the app
+Once the build is finished, you should have an executable file in the target folder of your project:
 
-Once this is working, add a new endpoint to your service called '/toClass'. This end point will take a Java classname as a paramter, such as 'java.lang.String', instantiate the class using reflection , cll
+```
+$ file target/*-runner
+target/quarkus-intro-lab-1.0-SNAPSHOT-runner: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=40559638e695105e1014a11b14ff0dfce5b2fb6b, with debug_info, not stripped
+```
 
+You can now start your application and see IF it works ;)
 
-You can even go further than that, and even generate a docker image to run your service. Do so, following the [instruction](https://quarkus.io/guides/building-native-image-guide#producing-a-native-executable) available on the Quarkus website. (but you won't be able during the lab, as Docker is not installed on the system).
+```
+$ ./target/*-runner
+```
+
+If the application does not work, try to see what you can remove or change your application to make it work. If you don't want to get stuck here, simply revert app to the content of the first lab and move on from there.
 
 Advanced Lab: modify the build to allow the standalone executable to [support HTTPS connection](https://quarkus.io/guides/native-and-ssl-guide).
+
+Once you have a native image, you can even go further than that, and even generate a docker image to run your service. Do so, following the [instruction](https://quarkus.io/guides/building-native-image-guide#producing-a-native-executable) available on the Quarkus website. (but you won't be able during the lab, as Docker is not installed on the system).
