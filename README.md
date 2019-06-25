@@ -3,14 +3,14 @@ Presented by
 
 * [Romain Pelisse](https://github.com/rpelisse)
 
+Requirement: this lab assume the attendee is familliar with Java/JEE application development.
+
 Connecting to the system
 ===
 
 Use the browser on your sytem to allocate one instance of this lab for you. Once this is done, you'll get a DNS hostname (or an IP) to get to the remote system provided for you. Simply use the SSH command to connect to the system with the user 'quarkus':
 
 ``` $ ssh quarkus@<DNS-name>```
-
-The password is: re3dh4t1!
 
 If you are not familliar with SSH, please let me (the instructor) know!
 
@@ -147,9 +147,9 @@ Before moving to the next lab, do ask any question about this part to the instru
 Lab 1 - Quarkus Core Features (CDI, Logging,...)
 ===
 
-This lab contains a series of requirements for you to implement by changing the code of the application we build during the first lab. Each requirement will allow you to explore the API and services provided by the Quarkus framework.
+This lab contains a series of requirements for you to implement by changing the code of the application we build during the first lab. Each requirement will allow you to explore the API and services provided by the Quarkus framework. Use this lab to explore some pretty cool feature of Quarkus, like the hot replacement of code!
 
-* Implements a log file for all business request, using @PostConstruct to open the logfile and @PreDestroy to ensure the resource is properly closed
+* Implements a log file (using [java.nio.files](http://roufid.com/append-content-to-file-in-java/#files)) for all business request, using @PostConstruct to open the logfile and @PreDestroy to ensure the resource is properly closed
 * Refactor your code to move the logic into a separate object, use [CDI injection](https://quarkus.io/guides/cdi-reference) facility to inject as a dependency (using @Inject)
 * Do a quick benchmark to evaluate the performance of your implementation
 * Replace your logfile using the [logging facility offered by Quarkus](https://quarkus.io/guides/logging-guide), rerun your benchmark to compare the performance of this new implementation
@@ -158,23 +158,131 @@ This lab contains a series of requirements for you to implement by changing the 
 Lab 2 - ReST
 ===
 
-* Modify the service to support [JSON](https://quarkus.io/guides/rest-json-guide)
+* Modify the service to return response as JSON [JSON](https://quarkus.io/guides/rest-json-guide)
+	* Create a class called Answer, with two fields 'name' and 'description'
+	* Implements all required getter/setter
+	* Add hashCode() and equals() methods
+	* Add quarkus-resteasy-jsonb to the pom.xml
+	* Modify the service to return JSON using the usual annotation
+	* Modify the method to return a list of Answer
+
 * Use the [Hibernate Validator](https://quarkus.io/guides/validation-guide) facility to validate input data.
-* Use the [ReST Client](https://quarkus.io/guides/rest-client-guide) to implement a proxy to TODO
+    * Add new method in the service trigger by a PUT call and expectation a string as input parameter
+    * turns the list of Answer into a static field, that is emptied by the call to the PUT method (before adding the new value
+    * Adding a new value for Answer should use the following URL path template: /quarkus/<name>/<description>
+    * Modify the previous GET accordingly
+    * Test that everything is working as expected
+    * Add the quarkus-hibernate-validator dependency to the pom.xml
+    * Inject the validator service (using @Inject) into the service class and use the appropriate annotation to ensure that the name is at 5 characters long
+
+At this point, we are going to change the nature of our service. Up until now, it was simply returning an precomputed answer. We are now going to turn it into a caching proxy to the online ReST service 'https://restcountries.eu/'. Everytime the information on a country will be requested, the service will return and cache it locally. Only info on requested country will be cached. For simplicity sake, the cache will be implemented using a static final instance of a simple Map as a property of the service class.
+
+* Use the Rest Client feature of Quarkus to implement the caching proxy for the 'Rest Countries' API
+    * Add the dependency to 'quarkus-smallrye-rest-client' to the pom.xml of the project
+	* Replace the Answer class by the Country class (provided on [Quarkus guide pages](https://quarkus.io/guides/rest-client-guide#setting-up-the-model) )
+	* Create an interface for the ReST Service (provided on [Quarkus guide pages](https://quarkus.io/guides/rest-client-guide#create-the-interface) )
+    * Add the URL to the ReST Service in the application configuration (as describedon [Quarkus guide pages](https://quarkus.io/guides/rest-client-guide#create-the-configuration) )
+    * Validate that the service is properly invoked and implement the cache using a simple Map, implements two endpoints, one returning the value of the country, the other listing the content of the cache
+    * Advanced: Implements a DELETE method that allow to remove country from the cache and a PUT method that allow to add country (that are potentialy missing from the remote service)
 
 Lab 3 - Hibernate (with Panache) - TODO
 ====
 
-* Set up Hibernate
-* Simplify using Panache: https://quarkus.io/guides/hibernate-orm-panache-guide
+
+We will now modify our cache, implemented in the previous lab, to use HypersonicSQL database as a storage instead of the Map. To do so, we'll follow the Quarkus tutorial called ["Simplified Hibernate ORM with Panache"](https://quarkus.io/guides/hibernate-orm-panache-guide).
+
+Part 1 - Configure the datasource
+
+* Test connection to the database
+    * First add the required dependency for the HSQL JDBC driver using the add extentions mechanism provided by Quarkus:
+```
+$ mvn quarkus:add-extension -Dextensions="jdbc-h2"
+```
+    * Configure the datasource into the application.properties, following the example provided in [the Quarkus guide](https://quarkus.io/guides/datasource-guide#configuring-the-datasource)
+        * Note that we will use a in-memory database for simplicity sake, so here is the JDBC URL to use:
+```
+quarkus.datasource.url=jdbc:h2:mem:mymemdb
+```
+		* Don't forget that HSQL expect the username SA
+		* Tweak the configuration to log the SQL, this help debugging later one
+		* Also indicate that the base generation should "drop and create"
+		* Don't do anything more than that for now
+    * For the next step, you'll need an extensions called Agroal, use the list-extensions feature to find the exact name of the extensions and install it:
+```
+$ mvn quarkus:list-extensions
+```
+    * Once the extension installed, inject (@Inject) an AgroalDataSource in the service class
+    * Implement a GET (/ds-check) to check that the dependency is properly injected (just return the result of toString() from the injected value)
+
+		* At last, for testing purpose, add a import.sql file, next to the application.properties, which will load a few values into your database:
+```
+NSERT INTO country(id,name,alpha2Code,capital) VALUES (nextval('hibernate_sequence'), 'France', 'fr', 'Paris')
+INSERT INTO country(id, name,alpha2Code,capital) VALUES (nextval('hibernate_sequence'), 'Deustschland','de', 'Berlin')
+
+```
+Part 2 - Using Panache to manipulate our entity
+
+* Using Panache (see [Quarkus guide](https://quarkus.io/guides/hibernate-orm-panache-guide)
+    * Search for the extensions associated with Panache and install it
+    * Transform the Country class into a Panache Entity (see [the example on the Quarkus guide](https://quarkus.io/guides/hibernate-orm-panache-guide#first-an-example) )
+		* Remove the field Currency and Capital of the Entity, as we won't need them
+	* Add a import.sql file, next to the application.properties, which will load a few values into your database:
+```
+INSERT INTO country(id,name,alpha2Code) VALUES (nextval('hibernate_sequence'), 'France', 'fr')
+INSERT INTO country(id, name,alpha2Code) VALUES (nextval('hibernate_sequence'), 'Deustschland','de')
+```
+	* Modify the /ds-check endpoint to return the content of the database using Panache built-in method: Country.listAll(Sort.by("name"));
+        * Return only the list of alpha2code (fr, de).
+
+Part 3 - Implementing the local database
+
+* Implement a method getCountry to search for the country, based on its name, and returns the alpha2code
+    * You'll need to implement a method findByname in Country (see [Quarkus guide](https://quarkus.io/guides/hibernate-orm-panache-guide#first-an-example)
+* If the country is not in the database, the service will fallback to the ReST service
+* Once the info returned by the remote service, the country needs to be added to the database
 
 Lab 4 - Security - TODO
 ===
 
-* https://quarkus.io/guides/security-guide
+In this section of the lab, we are going to secure the two endpoints we have previoulsy implemented. The endpont /ds-check, currently the content of the database will be secured to be only accessible to user associated to the group 'admin'. The endpoint /country will be only available to user authentificated as 'user'. Obviously, users belonging to the 'admin' needs to also belong to the 'user' group. To implement such authentification and authorization, we will follow the [Quarkus guide on security](https://quarkus.io/guides/security-guide).
+
+* Add the required dependency to the project's pom file: quarkus-elytron-security
+* Configure Quarkus for security:
+```
+# Let's secure our stuff
+quarkus.security.file.enabled=true
+quarkus.security.file.users=users.properties
+quarkus.security.file.roles=roles.properties
+quarkus.security.file.auth-mechanism=BASIC
+quarkus.security.file.realm-name=MyRealm
+ ```
+ * Add the user.properties file:
+ ```
+ yourusername=yourpassword
+ admin=admin
+ ```
+ * Add the roles.properties file:
+ ```
+ yourusername=user
+ admin=user, admin
+ ```
+* Finally, using the @RolesAllowed annotation configure the security as described above
+* Check that everything has been configured properly using the following queries:
+```
+$ curl  http://localhost:8080/quarkus/dscheck
+Not authorized
+$ curl  http://<yourusername>:<yourpassword>@localhost:8080/quarkus/dscheck
+Access forbidden: role not allowed
+$ curl  http://<yourusername>:<yourpassword>@localhost:8080/quarkus/country/France
+fr
+$ curl  http://localhost:9091/quarkus/dscheck
+Not authorized
+$ curl http://admin:theotherguy@localhost:9091/quarkus/dscheck
+[de,fr]
+```
 
 Lab 5 - Native image with GraalVM
-====
+===
 
 OK, so now we have a very lightweight ReST Service that starts in barely a few milliseonds. It's already incredibly fast compare to regular Java application server, but let's go even further, by generating a ... native image!
 
