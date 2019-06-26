@@ -8,6 +8,9 @@ Requirement: this lab assume the attendee is familliar with Java/JEE application
 Connecting to the system
 ===
 
+Go request your lab environnment on [GUID Grabber](https://www.opentlc.com/gg/gg.cgi?profile=generic_pc)
+Lab Activation Key: quarkus
+
 Use the browser on your sytem to allocate one instance of this lab for you. Once this is done, you'll get a DNS hostname (or an IP) to get to the remote system provided for you. Simply use the SSH command to connect to the system with the user 'quarkus':
 
 ``` $ ssh quarkus@<DNS-name>```
@@ -242,6 +245,7 @@ Part 3 - Implementing the local database
     * You'll need to implement a method findByname in Country (see [Quarkus guide](https://quarkus.io/guides/hibernate-orm-panache-guide#first-an-example)
 * If the country is not in the database, the service will fallback to the ReST service
 * Once the info returned by the remote service, the country needs to be added to the database
+    * Remember that a write operation on a database has more constraint than a read operation ...
 
 Lab 4 - Security - TODO
 ===
