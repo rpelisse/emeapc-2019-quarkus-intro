@@ -99,7 +99,7 @@ mvn clean compile
 This compilation should happen without any problem, so you can now fire the app!
 
 ```
-$ mvn clean compile quarks:dev
+$ mvn clean compile quarkus:dev
 [quarkus@control getting-started]$ mvn clean compile quarkus:dev
 [INFO] Scanning for projects...
 [INFO]
